@@ -1,5 +1,8 @@
+import { timeout } from '../utils/helper';
+
 const initialState = {
   message: '',
+  toggle: false,
 };
 
 const notificationReducer = (state = initialState, action) => {
@@ -7,23 +10,24 @@ const notificationReducer = (state = initialState, action) => {
     case 'SHOW_NOTIFICATION':
       return { ...state, message: action.message, toggle: true };
     case 'HIDE_NOTIFICATION':
-      return { ...state, message: initialState.message, toggle: false };
+      return { ...state, toggle: false };
     default:
       return state;
   }
 };
 
-const showNotification = (message) => {
-  return {
-    type: 'SHOW_NOTIFICATION',
-    message,
-  };
-};
-const hideNotification = (message) => {
-  return {
-    type: 'HIDE_NOTIFICATION',
+const setNotification = (message, time) => {
+  return async (dispatch) => {
+    dispatch({
+      type: 'SHOW_NOTIFICATION',
+      message,
+    });
+    await timeout(time);
+    dispatch({
+      type: 'HIDE_NOTIFICATION',
+    });
   };
 };
 
-export { showNotification, hideNotification };
+export { setNotification };
 export default notificationReducer;

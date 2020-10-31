@@ -1,10 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { upVote } from '../reducers/anecdoteReducer';
-import {
-  showNotification,
-  hideNotification,
-} from '../reducers/notificationReducer';
+import { editAnecdote } from '../reducers/anecdoteReducer';
+import { setNotification } from '../reducers/notificationReducer';
 
 const AnecdoteList = () => {
   const dispatch = useDispatch();
@@ -24,13 +21,11 @@ const AnecdoteList = () => {
     return sortedAnecdotes;
   });
 
-  const upVoteNotification = (id, anecdoteContent) => {
-    dispatch(upVote(id));
-    dispatch(showNotification(`you voted '${anecdoteContent}'`));
-
-    setTimeout(() => {
-      dispatch(hideNotification());
-    }, 5000);
+  const upVoteNotification = (anecdote) => {
+    const editedAnecdote = JSON.parse(JSON.stringify(anecdote));
+    editedAnecdote.votes += 1;    
+    dispatch(editAnecdote(editedAnecdote));
+    dispatch(setNotification(`you voted '${anecdote.content}'`, 5));
   };
 
   return anecdotes.map((anecdote) => (
@@ -38,11 +33,7 @@ const AnecdoteList = () => {
       <div>{anecdote.content}</div>
       <div>
         has {anecdote.votes}
-        <button
-          onClick={() => upVoteNotification(anecdote.id, anecdote.content)}
-        >
-          vote
-        </button>
+        <button onClick={() => upVoteNotification(anecdote)}>vote</button>
       </div>
     </div>
   ));
