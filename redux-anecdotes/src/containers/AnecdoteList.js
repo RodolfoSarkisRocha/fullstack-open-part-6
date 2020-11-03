@@ -1,31 +1,36 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
+// import { useSelector, useDispatch } from 'react-redux';
 import { editAnecdote } from '../reducers/anecdoteReducer';
 import { setNotification } from '../reducers/notificationReducer';
 
-const AnecdoteList = () => {
-  const dispatch = useDispatch();
-  const anecdotes = useSelector(({ anecdotes, filter }) => {
-    const sortedAnecdotes = anecdotes.sort((a, b) =>
-      a.votes > b.votes ? -1 : 1
-    );
-    if (filter.value) {
-      return sortedAnecdotes.filter((anecdote) => {
-        const content = anecdote?.content?.toLowerCase();
-        const lowerCaseFilter = filter.value.toLowerCase();
+const AnecdoteList = (props) => {
+  const { anecdotes, editAnecdote, setNotification } = props;
 
-        return content.includes(lowerCaseFilter);
-      });
-    }
+  // const dispatch = useDispatch();
+  // const anecdotes = useSelector(({ anecdotes, filter }) => {
+  //   const sortedAnecdotes = anecdotes.sort((a, b) =>
+  //     a.votes > b.votes ? -1 : 1
+  //   );
+  //   if (filter.value) {
+  //     return sortedAnecdotes.filter((anecdote) => {
+  //       const content = anecdote?.content?.toLowerCase();
+  //       const lowerCaseFilter = filter.value.toLowerCase();
 
-    return sortedAnecdotes;
-  });
+  //       return content.includes(lowerCaseFilter);
+  //     });
+  //   }
+
+  //   return sortedAnecdotes;
+  // });
 
   const upVoteNotification = (anecdote) => {
     const editedAnecdote = JSON.parse(JSON.stringify(anecdote));
-    editedAnecdote.votes += 1;    
-    dispatch(editAnecdote(editedAnecdote));
-    dispatch(setNotification(`you voted '${anecdote.content}'`, 5));
+    editedAnecdote.votes += 1;
+    // dispatch(editAnecdote(editedAnecdote));
+    // dispatch(setNotification(`you voted '${anecdote.content}'`, 5));
+    editAnecdote(editedAnecdote);
+    setNotification(`you voted '${anecdote.content}'`, 5);
   };
 
   return anecdotes.map((anecdote) => (
@@ -39,4 +44,31 @@ const AnecdoteList = () => {
   ));
 };
 
-export default AnecdoteList;
+const mapStateToProps = (state) => {
+  const { filter, anecdotes } = state;
+  const sortedAnecdotes = anecdotes.sort((a, b) =>
+    a.votes > b.votes ? -1 : 1
+  );
+
+  if (filter) {
+    const filteredAnecdotes = sortedAnecdotes.filter((anecdote) => {
+      const content = anecdote?.content?.toLowerCase();
+      const lowerCaseFilter = filter.value.toLowerCase();
+      return content.includes(lowerCaseFilter);
+    });
+    return {
+      anecdotes: filteredAnecdotes,
+    };
+  }
+
+  return { anecdotes: sortedAnecdotes };
+};
+
+const mapDispatchToProps = {
+  editAnecdote,
+  setNotification,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AnecdoteList);
+
+// export default AnecdoteList;
